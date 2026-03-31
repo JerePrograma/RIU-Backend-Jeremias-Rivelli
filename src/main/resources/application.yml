@@ -1,0 +1,36 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: hotel-search
+
+  datasource:
+    url: ${DB_URL:jdbc:oracle:thin:@oracle:1521/FREEPDB1}
+    username: ${DB_USERNAME:hotel_app}
+    password: ${DB_PASSWORD:hotel_app}
+    driver-class-name: ${DB_DRIVER:oracle.jdbc.OracleDriver}
+
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:always}
+      schema-locations: ${SQL_INIT_SCHEMA:classpath:db/schema.sql}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:hotel-search-group}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: ${KAFKA_TRUSTED_PACKAGES:com.riu.hotelsearch.*}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs

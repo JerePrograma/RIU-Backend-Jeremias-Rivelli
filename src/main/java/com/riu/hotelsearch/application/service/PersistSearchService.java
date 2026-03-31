@@ -12,11 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 
 /**
- * Servicio encargado de persistir búsquedas consumidas desde Kafka.
+ * Servicio de aplicación encargado de persistir búsquedas consumidas desde Kafka.
  *
- * <p>La operación se ejecuta dentro de una transacción para garantizar
- * que la inserción de la búsqueda y la actualización del contador agregado
- * se confirmen o reviertan juntas.</p>
+ * <p>La operación es transaccional para garantizar que la inserción de la búsqueda
+ * y la actualización del contador agregado se confirmen o reviertan juntas.</p>
  */
 @Service
 public class PersistSearchService implements PersistSearchUseCase {
@@ -32,6 +31,14 @@ public class PersistSearchService implements PersistSearchUseCase {
         this.incrementSearchCountPort = incrementSearchCountPort;
     }
 
+    /**
+     * Persiste una búsqueda consumida desde Kafka.
+     *
+     * <p>Si la búsqueda ya había sido registrada previamente, no vuelve a insertarse
+     * ni incrementa nuevamente el contador agregado.</p>
+     *
+     * @param message evento consumido desde Kafka
+     */
     @Override
     @Transactional
     public void persist(SearchMessage message) {

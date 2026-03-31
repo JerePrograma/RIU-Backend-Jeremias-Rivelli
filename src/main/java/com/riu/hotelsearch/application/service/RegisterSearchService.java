@@ -8,6 +8,13 @@ import com.riu.hotelsearch.domain.model.Search;
 import com.riu.hotelsearch.domain.service.SearchFingerprintCalculator;
 import org.springframework.stereotype.Service;
 
+/**
+ * Servicio de aplicación encargado de registrar una búsqueda de forma asíncrona.
+ *
+ * <p>La operación genera un identificador local, calcula el fingerprint de la
+ * búsqueda y publica un evento en Kafka. De este modo se evita agregar latencia
+ * de base de datos al camino de la solicitud HTTP.</p>
+ */
 @Service
 public class RegisterSearchService implements RegisterSearchUseCase {
 
@@ -25,9 +32,15 @@ public class RegisterSearchService implements RegisterSearchUseCase {
         this.searchFingerprintCalculator = searchFingerprintCalculator;
     }
 
+
     /**
-     * Registers the search asynchronously by publishing it to Kafka.
-     * The identifier is generated locally to avoid adding database latency to the HTTP request path.
+     * Registra una búsqueda y devuelve el identificador asignado.
+     *
+     * <p>La persistencia no se realiza en este punto, sino a través de la
+     * publicación de un evento para procesamiento asíncrono.</p>
+     *
+     * @param search búsqueda validada a registrar
+     * @return identificador único de la búsqueda
      */
     @Override
     public String register(Search search) {

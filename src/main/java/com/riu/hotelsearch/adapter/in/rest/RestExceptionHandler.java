@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Manejador global de excepciones de la capa REST.
+ *
+ * <p>Centraliza la conversión de errores técnicos y de validación en una
+ * estructura HTTP uniforme para la API.</p>
+ */
 @RestControllerAdvice
 public class RestExceptionHandler {
 
@@ -66,18 +72,6 @@ public class RestExceptionHandler {
         );
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGeneric(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                new ErrorResponseDto(
-                        Instant.now(),
-                        500,
-                        "Internal error",
-                        List.of("Unexpected error")
-                )
-        );
-    }
-
     @ExceptionHandler(SearchNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleNotFound(SearchNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -86,6 +80,18 @@ public class RestExceptionHandler {
                         404,
                         "Not found",
                         List.of(ex.getMessage())
+                )
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleGeneric(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ErrorResponseDto(
+                        Instant.now(),
+                        500,
+                        "Internal error",
+                        List.of("Unexpected error")
                 )
         );
     }

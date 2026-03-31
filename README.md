@@ -15,6 +15,12 @@ La API expone dos endpoints:
 - `POST /search`: registra una búsqueda y devuelve un `searchId`
 - `GET /count?searchId=...`: devuelve la búsqueda original asociada a ese identificador y la cantidad de veces que se registró una búsqueda equivalente
 
+## Convención de idioma
+
+La documentación del proyecto, el README y la descripción OpenAPI están en español.
+
+Las respuestas REST y los mensajes de error de la API se mantienen en inglés para conservar consistencia en la interacción técnica con clientes HTTP y facilitar su consumo desde integraciones.
+
 ## Decisiones de diseño
 
 Hay algunas decisiones que conviene dejar explícitas porque forman parte de la solución y no son accidentales.
@@ -59,14 +65,16 @@ Para evitar hacer `count(*)` repetidos sobre la tabla transaccional de búsqueda
 
 Esto mejora el comportamiento del endpoint `GET /count` cuando se consulta muchas veces una misma búsqueda.
 
-### Idempotencia del consumidor
+### Idempotencia y consistencia del consumidor
 
-El consumidor Kafka persiste la búsqueda de forma idempotente usando `searchId` como identificador único. Si el mensaje se reprocesa por retry o redelivery, no se vuelve a insertar la búsqueda ni se incrementa el contador más de una vez.
+El consumidor Kafka persiste la búsqueda de forma idempotente usando `searchId` como identificador único.
+
+Además, la inserción de la búsqueda individual y la actualización del contador agregado se ejecutan dentro de una misma transacción. De esta forma, ambas operaciones se confirman o revierten juntas y se evita dejar la información en un estado parcial ante fallas.
 
 ## Tecnologías usadas
 
 - Java 21
-- Spring Boot 3
+- Spring Boot 3.x
 - Spring Web
 - Spring Validation
 - Spring JDBC
@@ -94,14 +102,23 @@ La aplicación sigue una arquitectura hexagonal con separación por capas:
 
 La separación no busca “cumplir una forma”, sino dejar clara la dirección de dependencias y evitar mezclar HTTP, Kafka, SQL y lógica de negocio en una misma clase.
 
+## Consideraciones de concurrencia
+
+La aplicación fue diseñada para operar de forma segura bajo concurrencia:
+
+- los controllers, services y repositories no mantienen estado mutable compartido
+- los DTO y modelos de dominio son inmutables
+- la persistencia del consumidor Kafka es idempotente
+- la actualización del registro individual y del contador agregado se ejecuta dentro de una transacción
+- el offset del consumidor se confirma solo después de una persistencia exitosa
+
+La seguridad bajo concurrencia no depende de usar virtual threads, sino de evitar estado compartido mutable y mantener consistencia entre las operaciones críticas.
+
 ## Requisitos para ejecutar
 
 Para levantar el proyecto no hace falta tener Java, Maven, Oracle ni Kafka instalados localmente.
 
-Alcanza con tener:
-
-- Docker
-- Docker Compose
+Alcanza con tener Docker con soporte para `docker compose`.
 
 ## Cómo levantar la aplicación
 
@@ -119,6 +136,17 @@ docker compose build --no-cache
 docker compose up
 ```
 
+## Nota sobre el arranque inicial
+
+El primer arranque puede demorar más de lo habitual porque Oracle Database Free necesita inicializar su almacenamiento interno.
+
+Si algún contenedor falla en el primer intento, conviene revisar los logs y volver a ejecutar:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
 ## Servicios levantados
 
 El `docker-compose` levanta:
@@ -134,6 +162,11 @@ Una vez levantado el proyecto:
 - Aplicación: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/api-docs`
+
+La documentación interactiva de la API se encuentra disponible en Swagger UI y expone ambos endpoints desarrollados:
+
+- `POST /search`
+- `GET /count`
 
 ## Endpoints
 
@@ -241,9 +274,11 @@ Eso es esperable y está alineado con el diseño del challenge.
 La persistencia usa dos estructuras principales:
 
 ### `searches`
+
 Tabla transaccional donde se almacena cada búsqueda individual.
 
 ### `search_counts`
+
 Tabla agregada donde se mantiene el contador por fingerprint.
 
 La tabla agregada existe para evitar recalcular conteos sobre la tabla completa cada vez que se consulta el endpoint `GET /count`.
@@ -253,6 +288,7 @@ La tabla agregada existe para evitar recalcular conteos sobre la tabla completa 
 Kafka se usa para desacoplar la operación HTTP de la persistencia.
 
 ### Productor
+
 Publica un `SearchMessage` con:
 
 - `searchId`
@@ -263,6 +299,7 @@ Publica un `SearchMessage` con:
 - `ages`
 
 ### Consumidor
+
 Consume el mensaje, persiste la búsqueda y actualiza el contador agregado.
 
 El offset se confirma manualmente solo después de una persistencia exitosa.
@@ -279,9 +316,17 @@ Si tenés Maven instalado localmente:
 mvn clean verify
 ```
 
-Si no querés depender de Maven local, también podés generar la cobertura usando Docker:
+### Ejecutar cobertura con Docker
+
+En Linux/macOS:
 
 ```bash
+docker run --rm -v "${PWD}:/workspace" -w /workspace maven:3.9.9-eclipse-temurin-21 mvn clean verify
+```
+
+En PowerShell:
+
+```powershell
 docker run --rm -v "${PWD}:/workspace" -w /workspace maven:3.9.9-eclipse-temurin-21 mvn clean verify
 ```
 
@@ -305,16 +350,23 @@ Si además querés eliminar volúmenes:
 docker compose down -v
 ```
 
+## Limitaciones conocidas
+
+- La persistencia del alta es asíncrona, por lo que puede existir una ventana breve entre el `POST /search` y la disponibilidad inmediata del dato en `GET /count`.
+- El entorno Docker Compose está pensado para ejecución local y demostración técnica, no para despliegue productivo.
+- La configuración de Kafka y Oracle está ajustada para un entorno single-node.
+
 ## Posibles mejoras
 
 El objetivo del proyecto fue resolver el challenge con foco en claridad, validación, desacople y eficiencia del conteo. Aun así, hay mejoras posibles si esto evolucionara a un escenario más cercano a producción:
 
 - agregar observabilidad con métricas y tracing
 - incorporar manejo más fino de errores transitorios de Kafka
-- agregar healthchecks más detallados
+- endurecer la estrategia de readiness y healthchecks del entorno Docker
 - versionar esquema con Flyway o Liquibase
 - endurecer configuración de seguridad y secretos
 - ampliar la estrategia de testing con pruebas de integración más completas
+- evaluar patrón outbox o estrategias de consistencia más fuertes si la publicación de eventos y la persistencia evolucionaran a un escenario distribuido más exigente
 
 ## Resumen final
 

@@ -5,6 +5,11 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
+/**
+ * Consumidor encargado de recibir búsquedas desde Kafka y delegar su persistencia.
+ *
+ * <p>El offset se confirma manualmente solo después de una persistencia exitosa.</p>
+ */
 @Component
 public class KafkaSearchConsumer {
 
@@ -14,6 +19,13 @@ public class KafkaSearchConsumer {
         this.persistSearchUseCase = persistSearchUseCase;
     }
 
+    /**
+     * Procesa un mensaje consumido desde Kafka y confirma su offset
+     * una vez completada la persistencia.
+     *
+     * @param message mensaje recibido
+     * @param acknowledgment confirmación manual del offset
+     */
     @KafkaListener(
             topics = "${app.kafka.topic:hotel_availability_searches}",
             containerFactory = "searchKafkaListenerContainerFactory"

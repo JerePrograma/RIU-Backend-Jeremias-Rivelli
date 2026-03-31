@@ -9,6 +9,12 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 
+/**
+ * Repositorio JDBC encargado de insertar búsquedas individuales.
+ *
+ * <p>La operación es idempotente respecto de searchId. Si la búsqueda ya existe,
+ * se considera un caso esperado y se informa como no insertada.</p>
+ */
 @Repository
 public class SearchWriteJdbcRepository implements SaveSearchIfAbsentPort {
 
@@ -23,6 +29,12 @@ public class SearchWriteJdbcRepository implements SaveSearchIfAbsentPort {
         this.rowMapper = rowMapper;
     }
 
+    /**
+     * Inserta la búsqueda solo si todavía no existe un registro con el mismo searchId.
+     *
+     * @param record búsqueda a persistir
+     * @return {@code true} si la búsqueda fue insertada, {@code false} si ya existía
+     */
     @Override
     public boolean saveIfAbsent(SearchRecord record) {
         String sql = """

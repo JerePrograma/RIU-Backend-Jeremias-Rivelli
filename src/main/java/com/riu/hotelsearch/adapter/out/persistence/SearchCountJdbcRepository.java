@@ -6,6 +6,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Repositorio JDBC encargado de mantener y consultar el contador agregado
+ * de búsquedas equivalentes por fingerprint.
+ */
 @Repository
 public class SearchCountJdbcRepository implements IncrementSearchCountPort, GetSearchCountPort {
 
@@ -15,6 +19,14 @@ public class SearchCountJdbcRepository implements IncrementSearchCountPort, GetS
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Incrementa el contador agregado asociado al fingerprint indicado.
+     *
+     * <p>La actualización se realiza mediante MERGE para resolver de forma
+     * atómica la inserción inicial o el incremento posterior.</p>
+     *
+     * @param fingerprint fingerprint de la búsqueda
+     */
     @Override
     public void increment(String fingerprint) {
         String sql = """
@@ -32,6 +44,12 @@ public class SearchCountJdbcRepository implements IncrementSearchCountPort, GetS
         jdbcTemplate.update(sql, params);
     }
 
+    /**
+     * Obtiene el contador agregado asociado al fingerprint indicado.
+     *
+     * @param fingerprint fingerprint de la búsqueda
+     * @return cantidad de búsquedas equivalentes registradas
+     */
     @Override
     public long getByFingerprint(String fingerprint) {
         String sql = """

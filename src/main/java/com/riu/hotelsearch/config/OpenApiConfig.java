@@ -6,9 +6,15 @@ import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuración base de OpenAPI para la documentación pública de la API.
+ */
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * Configuración base de OpenAPI para la documentación pública de la API.
+     */
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()

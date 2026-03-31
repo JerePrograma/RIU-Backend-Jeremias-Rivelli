@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller REST encargado de exponer la consulta de conteo
+ * de búsquedas previamente registradas.
+ */
 @RestController
 @Validated
 @Tag(
@@ -34,6 +38,10 @@ public class CountController {
         this.countSearchUseCase = countSearchUseCase;
     }
 
+    /**
+     * Devuelve la búsqueda original asociada al identificador indicado
+     * junto con el total de repeticiones equivalentes.
+     */
     @Operation(
             summary = "Consultar el conteo de una búsqueda",
             description = """

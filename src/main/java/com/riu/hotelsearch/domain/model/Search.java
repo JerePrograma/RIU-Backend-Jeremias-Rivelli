@@ -5,6 +5,12 @@ import com.riu.hotelsearch.domain.exception.InvalidSearchException;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Representa una búsqueda de disponibilidad de hotel validada e inmutable.
+ *
+ * <p>El orden de la lista de edades forma parte de la identidad lógica de la búsqueda,
+ * por lo que no debe alterarse durante la construcción ni durante su uso posterior.</p>
+ */
 public record Search(
         String hotelId,
         LocalDate checkIn,

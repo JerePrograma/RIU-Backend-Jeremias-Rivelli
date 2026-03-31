@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Repositorio JDBC encargado de recuperar una búsqueda a partir de su searchId.
+ */
 @Repository
 public class SearchReadJdbcRepository implements FindSearchPort {
 

@@ -17,6 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller REST encargado de exponer el registro de búsquedas
+ * de disponibilidad de hotel.
+ */
 @RestController
 @RequestMapping("/search")
 @Tag(
@@ -31,6 +35,10 @@ public class SearchController {
         this.registerSearchUseCase = registerSearchUseCase;
     }
 
+    /**
+     * Acepta una búsqueda válida, genera un identificador y delega
+     * su persistencia para procesamiento asíncrono.
+     */
     @Operation(
             summary = "Registrar una búsqueda",
             description = """
@@ -71,9 +79,9 @@ public class SearchController {
                                             {
                                               "timestamp": "2026-03-31T18:10:00Z",
                                               "status": 400,
-                                              "error": "Error de validación",
+                                              "error": "Validation error",
                                               "details": [
-                                                "checkIn: La fecha de check-in es obligatoria"
+                                                "checkIn: checkIn must not be null"
                                               ]
                                             }
                                             """

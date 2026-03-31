@@ -3,6 +3,12 @@ package com.riu.hotelsearch.adapter.out.kafka;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Evento de búsqueda intercambiado entre el productor y el consumidor Kafka.
+ *
+ * <p>Incluye tanto el identificador técnico de la búsqueda como el fingerprint
+ * utilizado para agrupar búsquedas equivalentes.</p>
+ */
 public record SearchMessage(
         String searchId,
         String fingerprint,

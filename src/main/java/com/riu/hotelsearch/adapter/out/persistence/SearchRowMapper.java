@@ -10,9 +10,19 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Mapper JDBC encargado de reconstruir una búsqueda persistida
+ * a partir de una fila del result set.
+ */
 @Component
 public class SearchRowMapper implements RowMapper<SearchRecord> {
 
+    /**
+     * Convierte la lista de edades en su representación CSV para persistencia.
+     *
+     * @param ages edades de la búsqueda
+     * @return representación CSV de la lista
+     */
     @Override
     public SearchRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
         Search search = new Search(

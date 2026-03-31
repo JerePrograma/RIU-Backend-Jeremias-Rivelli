@@ -9,11 +9,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.HexFormat;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación por defecto del cálculo de fingerprint basada en SHA-256.
+ *
+ * <p>El valor se genera a partir de una concatenación determinística de los
+ * campos relevantes de la búsqueda, respetando el orden original de las edades.</p>
+ */
 @Component
 public class DefaultSearchFingerprintCalculator implements SearchFingerprintCalculator {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
+    /**
+     * Calcula el fingerprint determinístico de una búsqueda.
+     *
+     * @param search búsqueda validada
+     * @return fingerprint en formato hexadecimal
+     */
     @Override
     public String calculate(Search search) {
         String ages = search.ages().stream()

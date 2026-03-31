@@ -10,6 +10,12 @@ import org.springframework.kafka.listener.ContainerProperties;
 @Configuration
 public class KafkaListenerConfig {
 
+    /**
+     * Configura el contenedor de listeners Kafka utilizado por la aplicación.
+     *
+     * <p>La confirmación manual del offset permite reconocer el mensaje solo
+     * después de completar su persistencia.</p>
+     */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, SearchMessage> searchKafkaListenerContainerFactory(
             ConsumerFactory<String, SearchMessage> consumerFactory,

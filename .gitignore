@@ -1,5 +1,5 @@
 # Maven
-target/
+/target/
 
 # Maven Wrapper
 !.mvn/wrapper/maven-wrapper.jar
@@ -10,18 +10,18 @@ target/
 !.env.example
 
 # IntelliJ IDEA
-.idea/
+/.idea/
 *.iws
 *.iml
 *.ipr
-out/
+/out/
 
 # Eclipse
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings/
+/.settings/
 .springBeans
 .sts4-cache
 
@@ -31,14 +31,14 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+/build/
 
 # VS Code
-.vscode/
+/.vscode/
 
 # Logs
 *.log
-logs/
+/logs/
 
 # OS
 .DS_Store

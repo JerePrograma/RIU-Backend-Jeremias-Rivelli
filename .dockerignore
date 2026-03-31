@@ -1,0 +1,15 @@
+target
+.git
+.idea
+.vscode
+out
+build
+.env
+.env.*
+!.env.example
+*.log
+logs
+.DS_Store
+Thumbs.db
+target/site
+coverage

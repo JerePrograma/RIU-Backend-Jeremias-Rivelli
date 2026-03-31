@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 

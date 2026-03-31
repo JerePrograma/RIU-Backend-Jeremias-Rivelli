@@ -21,16 +21,33 @@ spring:
     consumer:
       group-id: ${KAFKA_CONSUMER_GROUP_ID:hotel-search-group}
       auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: ${KAFKA_TRUSTED_PACKAGES:com.riu.hotelsearch.*}
+        spring.json.trusted.packages: ${KAFKA_TRUSTED_PACKAGES:com.riu.hotelsearch.adapter.out.kafka}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 10
+      properties:
+        enable.idempotence: true
+        linger.ms: 5
+
+  threads:
+    virtual:
+      enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:false}
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
   api-docs:
     path: /api-docs
+
+app:
+  kafka:
+    topic: ${APP_KAFKA_TOPIC:hotel_availability_searches}
+    partitions: ${APP_KAFKA_PARTITIONS:4}
+    replication-factor: ${APP_KAFKA_REPLICATION_FACTOR:1}
+    listener-concurrency: ${APP_KAFKA_LISTENER_CONCURRENCY:4}

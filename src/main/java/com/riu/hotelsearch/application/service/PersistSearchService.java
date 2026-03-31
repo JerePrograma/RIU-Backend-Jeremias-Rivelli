@@ -2,29 +2,38 @@ package com.riu.hotelsearch.application.service;
 
 import com.riu.hotelsearch.adapter.out.kafka.SearchMessage;
 import com.riu.hotelsearch.application.port.in.PersistSearchUseCase;
-import com.riu.hotelsearch.application.port.out.SaveSearchPort;
+import com.riu.hotelsearch.application.port.out.IncrementSearchCountPort;
+import com.riu.hotelsearch.application.port.out.SaveSearchIfAbsentPort;
 import com.riu.hotelsearch.domain.model.Search;
 import com.riu.hotelsearch.domain.model.SearchRecord;
-import com.riu.hotelsearch.domain.service.SearchFingerprintCalculator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+/**
+ * Servicio encargado de persistir búsquedas consumidas desde Kafka.
+ *
+ * <p>La operación se ejecuta dentro de una transacción para garantizar
+ * que la inserción de la búsqueda y la actualización del contador agregado
+ * se confirmen o reviertan juntas.</p>
+ */
 @Service
 public class PersistSearchService implements PersistSearchUseCase {
 
-    private final SaveSearchPort saveSearchPort;
-    private final SearchFingerprintCalculator searchFingerprintCalculator;
+    private final SaveSearchIfAbsentPort saveSearchIfAbsentPort;
+    private final IncrementSearchCountPort incrementSearchCountPort;
 
     public PersistSearchService(
-            SaveSearchPort saveSearchPort,
-            SearchFingerprintCalculator searchFingerprintCalculator
+            SaveSearchIfAbsentPort saveSearchIfAbsentPort,
+            IncrementSearchCountPort incrementSearchCountPort
     ) {
-        this.saveSearchPort = saveSearchPort;
-        this.searchFingerprintCalculator = searchFingerprintCalculator;
+        this.saveSearchIfAbsentPort = saveSearchIfAbsentPort;
+        this.incrementSearchCountPort = incrementSearchCountPort;
     }
 
     @Override
+    @Transactional
     public void persist(SearchMessage message) {
         Search search = new Search(
                 message.hotelId(),
@@ -33,15 +42,17 @@ public class PersistSearchService implements PersistSearchUseCase {
                 message.ages()
         );
 
-        String fingerprint = searchFingerprintCalculator.calculate(search);
-
         SearchRecord record = new SearchRecord(
                 message.searchId(),
                 search,
-                fingerprint,
+                message.fingerprint(),
                 Instant.now()
         );
 
-        saveSearchPort.save(record);
+        boolean inserted = saveSearchIfAbsentPort.saveIfAbsent(record);
+
+        if (inserted) {
+            incrementSearchCountPort.increment(message.fingerprint());
+        }
     }
 }

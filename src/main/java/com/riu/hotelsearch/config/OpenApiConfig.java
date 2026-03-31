@@ -15,9 +15,17 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Hotel Search API")
                         .version("1.0.0")
-                        .description("API para registrar búsquedas de disponibilidad y consultar su conteo"))
+                        .description("""
+                                API para registrar búsquedas de disponibilidad de hotel de forma asíncrona
+                                y consultar cuántas veces se repitió una búsqueda equivalente.
+                                
+                                La operación POST /search responde 202 Accepted porque la persistencia se
+                                desacopla mediante Kafka.
+                                
+                                El orden de la lista de edades forma parte de la identidad de la búsqueda.
+                                """))
                 .externalDocs(new ExternalDocumentation()
-                        .description("README")
-                        .url("http://localhost:8080"));
+                        .description("Documentación del proyecto")
+                        .url("REEMPLAZAR_POR_URL_DEL_REPOSITORIO"));
     }
 }

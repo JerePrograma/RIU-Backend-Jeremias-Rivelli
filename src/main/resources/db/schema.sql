@@ -9,3 +9,8 @@ create table searches (
 );
 
 create index ix_searches_fingerprint on searches (fingerprint);
+
+create table search_counts (
+                               fingerprint varchar2(64) primary key,
+                               total_count number(19) not null
+);

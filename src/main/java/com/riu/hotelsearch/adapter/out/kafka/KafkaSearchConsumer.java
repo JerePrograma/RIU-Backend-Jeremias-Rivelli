@@ -2,6 +2,7 @@ package com.riu.hotelsearch.adapter.out.kafka;
 
 import com.riu.hotelsearch.application.port.in.PersistSearchUseCase;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,8 +14,12 @@ public class KafkaSearchConsumer {
         this.persistSearchUseCase = persistSearchUseCase;
     }
 
-    @KafkaListener(topics = "hotel_availability_searches", groupId = "hotel-search-group")
-    public void consume(SearchMessage message) {
+    @KafkaListener(
+            topics = "${app.kafka.topic:hotel_availability_searches}",
+            containerFactory = "searchKafkaListenerContainerFactory"
+    )
+    public void consume(SearchMessage message, Acknowledgment acknowledgment) {
         persistSearchUseCase.persist(message);
+        acknowledgment.acknowledge();
     }
 }

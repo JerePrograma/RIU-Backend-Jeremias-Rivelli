@@ -1,8 +1,9 @@
 package com.riu.hotelsearch.application.service;
 
+import com.riu.hotelsearch.application.exception.SearchNotFoundException;
 import com.riu.hotelsearch.application.port.in.CountSearchUseCase;
-import com.riu.hotelsearch.application.port.out.CountSearchesPort;
 import com.riu.hotelsearch.application.port.out.FindSearchPort;
+import com.riu.hotelsearch.application.port.out.GetSearchCountPort;
 import com.riu.hotelsearch.domain.model.SearchCount;
 import com.riu.hotelsearch.domain.model.SearchRecord;
 import org.springframework.stereotype.Service;
@@ -11,22 +12,22 @@ import org.springframework.stereotype.Service;
 public class CountSearchService implements CountSearchUseCase {
 
     private final FindSearchPort findSearchPort;
-    private final CountSearchesPort countSearchesPort;
+    private final GetSearchCountPort getSearchCountPort;
 
     public CountSearchService(
             FindSearchPort findSearchPort,
-            CountSearchesPort countSearchesPort
+            GetSearchCountPort getSearchCountPort
     ) {
         this.findSearchPort = findSearchPort;
-        this.countSearchesPort = countSearchesPort;
+        this.getSearchCountPort = getSearchCountPort;
     }
 
     @Override
     public SearchCount count(String searchId) {
         SearchRecord record = findSearchPort.findById(searchId)
-                .orElseThrow(() -> new IllegalArgumentException("Search not found"));
+                .orElseThrow(() -> new SearchNotFoundException(searchId));
 
-        long count = countSearchesPort.countByFingerprint(record.fingerprint());
+        long count = getSearchCountPort.getByFingerprint(record.fingerprint());
 
         return new SearchCount(record.searchId(), record.search(), count);
     }

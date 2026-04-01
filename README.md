@@ -356,18 +356,6 @@ docker compose down -v
 - El entorno Docker Compose está pensado para ejecución local y demostración técnica, no para despliegue productivo.
 - La configuración de Kafka y Oracle está ajustada para un entorno single-node.
 
-## Posibles mejoras
-
-El objetivo del proyecto fue resolver el challenge con foco en claridad, validación, desacople y eficiencia del conteo. Aun así, hay mejoras posibles si esto evolucionara a un escenario más cercano a producción:
-
-- agregar observabilidad con métricas y tracing
-- incorporar manejo más fino de errores transitorios de Kafka
-- endurecer la estrategia de readiness y healthchecks del entorno Docker
-- versionar esquema con Flyway o Liquibase
-- endurecer configuración de seguridad y secretos
-- ampliar la estrategia de testing con pruebas de integración más completas
-- evaluar patrón outbox o estrategias de consistencia más fuertes si la publicación de eventos y la persistencia evolucionaran a un escenario distribuido más exigente
-
 ## Resumen final
 
 La solución busca equilibrar tres cosas:

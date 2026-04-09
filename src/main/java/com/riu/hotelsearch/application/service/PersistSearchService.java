@@ -1,7 +1,6 @@
 package com.riu.hotelsearch.application.service;
 
 import com.riu.hotelsearch.domain.event.SearchRegisteredEvent;
-import com.riu.hotelsearch.infrastructure.out.messaging.kafka.SearchMessage;
 import com.riu.hotelsearch.application.port.in.PersistSearchUseCase;
 import com.riu.hotelsearch.domain.port.out.IncrementSearchCountPort;
 import com.riu.hotelsearch.domain.port.out.SaveSearchIfAbsentPort;

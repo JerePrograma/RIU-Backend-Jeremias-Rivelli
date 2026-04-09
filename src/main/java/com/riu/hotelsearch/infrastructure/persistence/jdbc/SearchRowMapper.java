@@ -3,7 +3,6 @@ package com.riu.hotelsearch.infrastructure.persistence.jdbc;
 import com.riu.hotelsearch.domain.model.Search;
 import com.riu.hotelsearch.domain.model.SearchRecord;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,14 +13,15 @@ import java.util.List;
  * Mapper JDBC encargado de reconstruir una búsqueda persistida
  * a partir de una fila del result set.
  */
-@Component
 public class SearchRowMapper implements RowMapper<SearchRecord> {
 
     /**
-     * Convierte la lista de edades en su representación CSV para persistencia.
+     * Reconstruye un {@link SearchRecord} a partir de una fila del result set.
      *
-     * @param ages edades de la búsqueda
-     * @return representación CSV de la lista
+     * @param rs result set posicionado en la fila actual
+     * @param rowNum índice de fila informado por Spring JDBC
+     * @return búsqueda persistida reconstruida desde la fila actual
+     * @throws SQLException si ocurre un error al leer columnas del result set
      */
     @Override
     public SearchRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -40,6 +40,12 @@ public class SearchRowMapper implements RowMapper<SearchRecord> {
         );
     }
 
+    /**
+     * Convierte la lista de edades en su representación CSV para persistencia.
+     *
+     * @param ages edades de la búsqueda
+     * @return representación CSV de la lista
+     */
     public String toAgesCsv(List<Integer> ages) {
         return ages.stream()
                 .map(String::valueOf)

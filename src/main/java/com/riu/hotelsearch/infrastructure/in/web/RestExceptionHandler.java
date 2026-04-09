@@ -49,7 +49,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponseDto> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponseDto> handleUnreadableMessage() {
         return ResponseEntity.badRequest().body(
                 new ErrorResponseDto(
                         Instant.now(),
@@ -85,7 +85,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGeneric(Exception ex) {
+    public ResponseEntity<ErrorResponseDto> handleGeneric() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 new ErrorResponseDto(
                         Instant.now(),

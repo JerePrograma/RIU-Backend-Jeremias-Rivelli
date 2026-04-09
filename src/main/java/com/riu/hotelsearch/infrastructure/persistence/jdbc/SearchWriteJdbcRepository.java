@@ -2,10 +2,11 @@ package com.riu.hotelsearch.infrastructure.persistence.jdbc;
 
 import com.riu.hotelsearch.domain.port.out.SaveSearchIfAbsentPort;
 import com.riu.hotelsearch.domain.model.SearchRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 
@@ -15,8 +16,9 @@ import java.sql.Timestamp;
  * <p>La operación es idempotente respecto de searchId. Si la búsqueda ya existe,
  * se considera un caso esperado y se informa como no insertada.</p>
  */
-@Repository
 public class SearchWriteJdbcRepository implements SaveSearchIfAbsentPort {
+
+    private static final Logger log = LoggerFactory.getLogger(SearchWriteJdbcRepository.class);
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SearchRowMapper rowMapper;
@@ -69,6 +71,7 @@ public class SearchWriteJdbcRepository implements SaveSearchIfAbsentPort {
         try {
             return jdbcTemplate.update(sql, params) == 1;
         } catch (DuplicateKeyException ex) {
+            log.debug("Search already persisted, skipping duplicate insert. searchId={}", record.searchId());
             return false;
         }
     }

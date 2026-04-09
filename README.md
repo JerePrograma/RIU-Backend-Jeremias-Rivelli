@@ -2,15 +2,15 @@
 
 ## Descripción
 
-Este proyecto resuelve un challenge orientado a registrar búsquedas de disponibilidad de hotel y consultar cuántas veces se repitió una búsqueda equivalente.
+Este proyecto resuelve un challenge técnico orientado a registrar búsquedas de disponibilidad hotelera y consultar cuántas veces se repitió una búsqueda equivalente.
 
-La solución está construida con Spring Boot, Java 21, Kafka y Oracle, y sigue una arquitectura hexagonal sin modularización física. La idea principal es separar con claridad el ingreso por HTTP, la publicación y consumo de eventos, la lógica de aplicación y la persistencia.
+La solución está construida con Spring Boot, Java 21, Kafka y Oracle, y sigue una arquitectura hexagonal sin modularización física, organizada en tres paquetes base: `domain`, `application` e `infrastructure`. La idea principal es separar con claridad la lógica de dominio, los casos de uso y los adaptadores técnicos de entrada/salida.
 
 La operación de registro de búsqueda es asíncrona: el endpoint `POST /search` acepta la solicitud, genera un identificador local y publica un evento en Kafka. Luego un consumidor persiste la búsqueda en base de datos y actualiza un contador agregado por fingerprint.
 
 ## Objetivo funcional
 
-La API expone dos endpoints:
+La API expone dos endpoints principales:
 
 - `POST /search`: registra una búsqueda y devuelve un `searchId`
 - `GET /count?searchId=...`: devuelve la búsqueda original asociada a ese identificador y la cantidad de veces que se registró una búsqueda equivalente
@@ -36,7 +36,7 @@ El endpoint `POST /search` no persiste directamente en base de datos. En su luga
 5. publica el evento en Kafka
 6. devuelve `202 Accepted`
 
-La persistencia real ocurre después, en el consumidor Kafka. Por eso la respuesta del alta no es `200 OK`, sino `202 Accepted`.
+La persistencia real ocurre después, en el consumidor Kafka. Por eso la respuesta del alta no es `200 OK`, sino `202 Accepted`, ya que la solicitud fue aceptada para procesamiento asíncrono.
 
 ### Identidad lógica de la búsqueda
 
@@ -87,26 +87,34 @@ Además, la inserción de la búsqueda individual y la actualización del contad
 
 ## Arquitectura
 
-La aplicación sigue una arquitectura hexagonal con separación por capas:
+La aplicación sigue una arquitectura hexagonal con separación lógica en tres paquetes base:
 
-- `adapter.in.rest`: controllers y DTOs de entrada
-- `application.service`: casos de uso
+- `domain`: modelo de dominio, eventos, servicios de dominio y puertos de salida
+- `application`: casos de uso y puertos de entrada
+- `infrastructure`: adaptadores de entrada/salida y configuración técnica
+
+La estructura principal del proyecto queda organizada de esta forma:
+
+- `domain.model`: entidades y value objects del dominio
+- `domain.event`: eventos de dominio
+- `domain.service`: servicios de dominio puros
+- `domain.port.out`: puertos de salida requeridos por la aplicación
 - `application.port.in`: puertos de entrada
-- `application.port.out`: puertos de salida
-- `adapter.out.kafka`: productor y consumidor Kafka
-- `adapter.out.persistence`: repositorios JDBC
-- `domain.model`: modelo de dominio
-- `domain.service`: servicios de dominio
-- `config`: configuración general
-- `config.kafka`: configuración específica de Kafka
+- `application.service`: implementación de casos de uso
+- `infrastructure.in.web`: controllers y DTOs HTTP de entrada
+- `infrastructure.in.messaging.kafka`: consumidor Kafka
+- `infrastructure.out.messaging.kafka`: productor Kafka y mensajes de integración
+- `infrastructure.persistence.jdbc`: repositorios JDBC y mappers
+- `infrastructure.config`: composición de dependencias y configuración técnica
+- `infrastructure.config.kafka`: configuración específica de Kafka
 
-La separación no busca “cumplir una forma”, sino dejar clara la dirección de dependencias y evitar mezclar HTTP, Kafka, SQL y lógica de negocio en una misma clase.
+La dirección de dependencias se mantiene desde `infrastructure` hacia `application` y `domain`, mientras que `application` depende de contratos definidos en `domain`. La infraestructura implementa esos contratos, pero no define puertos propios.
 
 ## Consideraciones de concurrencia
 
 La aplicación fue diseñada para operar de forma segura bajo concurrencia:
 
-- los controllers, services y repositories no mantienen estado mutable compartido
+- los controllers, casos de uso, productores, consumidores y repositorios JDBC no mantienen estado mutable compartido
 - los DTO y modelos de dominio son inmutables
 - la persistencia del consumidor Kafka es idempotente
 - la actualización del registro individual y del contador agregado se ejecuta dentro de una transacción
@@ -289,7 +297,7 @@ Kafka se usa para desacoplar la operación HTTP de la persistencia.
 
 ### Productor
 
-Publica un `SearchMessage` con:
+El productor publica un `SearchMessage` con:
 
 - `searchId`
 - `fingerprint`
@@ -297,6 +305,8 @@ Publica un `SearchMessage` con:
 - `checkIn`
 - `checkOut`
 - `ages`
+
+La publicación del evento forma parte del flujo del `POST /search`, ya que la API genera un identificador local y delega el procesamiento posterior al canal de mensajería.
 
 ### Consumidor
 
@@ -361,10 +371,12 @@ docker compose down -v
 La solución busca equilibrar tres cosas:
 
 1. cumplir con el enunciado
-2. mantener una arquitectura clara
+2. mantener una arquitectura hexagonal estricta y legible
 3. evitar decisiones que funcionen en demo pero escalen mal bajo repetición intensiva de consultas
 
-La parte más importante de ese equilibrio está en dos decisiones:
+La parte más importante de ese equilibrio está en estas decisiones:
 
+- separación estricta entre `domain`, `application` e `infrastructure`
 - persistencia asíncrona con Kafka
 - contador agregado por fingerprint
+- puertos definidos fuera de infraestructura para evitar acoplamiento técnico en la lógica de negocio

@@ -4,13 +4,11 @@ import com.riu.hotelsearch.domain.port.out.GetSearchCountPort;
 import com.riu.hotelsearch.domain.port.out.IncrementSearchCountPort;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 /**
  * Repositorio JDBC encargado de mantener y consultar el contador agregado
  * de búsquedas equivalentes por fingerprint.
  */
-@Repository
 public class SearchCountJdbcRepository implements IncrementSearchCountPort, GetSearchCountPort {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;

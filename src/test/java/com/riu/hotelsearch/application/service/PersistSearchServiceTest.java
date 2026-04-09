@@ -1,16 +1,18 @@
 package com.riu.hotelsearch.application.service;
 
-import com.riu.hotelsearch.adapter.out.kafka.SearchMessage;
-import com.riu.hotelsearch.application.port.out.IncrementSearchCountPort;
-import com.riu.hotelsearch.application.port.out.SaveSearchIfAbsentPort;
+import com.riu.hotelsearch.domain.event.SearchRegisteredEvent;
 import com.riu.hotelsearch.domain.model.SearchRecord;
+import com.riu.hotelsearch.domain.port.out.IncrementSearchCountPort;
+import com.riu.hotelsearch.domain.port.out.SaveSearchIfAbsentPort;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class PersistSearchServiceTest {
@@ -25,7 +27,7 @@ class PersistSearchServiceTest {
 
     @Test
     void shouldPersistAndIncrementWhenInserted() {
-        SearchMessage message = new SearchMessage(
+        SearchRegisteredEvent event = new SearchRegisteredEvent(
                 "search-id-1",
                 "fingerprint-1",
                 "1234aBc",
@@ -36,9 +38,10 @@ class PersistSearchServiceTest {
 
         when(saveSearchIfAbsentPort.saveIfAbsent(any(SearchRecord.class))).thenReturn(true);
 
-        service.persist(message);
+        service.persist(event);
 
         ArgumentCaptor<SearchRecord> captor = ArgumentCaptor.forClass(SearchRecord.class);
+
         verify(saveSearchIfAbsentPort).saveIfAbsent(captor.capture());
         verify(incrementSearchCountPort).increment("fingerprint-1");
 
@@ -54,7 +57,7 @@ class PersistSearchServiceTest {
 
     @Test
     void shouldNotIncrementWhenSearchAlreadyExists() {
-        SearchMessage message = new SearchMessage(
+        SearchRegisteredEvent event = new SearchRegisteredEvent(
                 "search-id-2",
                 "fingerprint-2",
                 "1234aBc",
@@ -65,7 +68,7 @@ class PersistSearchServiceTest {
 
         when(saveSearchIfAbsentPort.saveIfAbsent(any(SearchRecord.class))).thenReturn(false);
 
-        service.persist(message);
+        service.persist(event);
 
         verify(saveSearchIfAbsentPort).saveIfAbsent(any(SearchRecord.class));
         verifyNoInteractions(incrementSearchCountPort);

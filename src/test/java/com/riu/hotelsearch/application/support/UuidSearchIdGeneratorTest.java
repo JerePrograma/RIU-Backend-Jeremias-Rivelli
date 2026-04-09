@@ -1,5 +1,6 @@
 package com.riu.hotelsearch.application.support;
 
+import com.riu.hotelsearch.infrastructure.support.UuidSearchIdGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

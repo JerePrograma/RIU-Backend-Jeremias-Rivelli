@@ -1,13 +1,12 @@
 package com.riu.hotelsearch.application.service;
 
-import com.riu.hotelsearch.adapter.out.kafka.SearchMessage;
+import com.riu.hotelsearch.domain.event.SearchRegisteredEvent;
+import com.riu.hotelsearch.infrastructure.out.messaging.kafka.SearchMessage;
 import com.riu.hotelsearch.application.port.in.PersistSearchUseCase;
-import com.riu.hotelsearch.application.port.out.IncrementSearchCountPort;
-import com.riu.hotelsearch.application.port.out.SaveSearchIfAbsentPort;
+import com.riu.hotelsearch.domain.port.out.IncrementSearchCountPort;
+import com.riu.hotelsearch.domain.port.out.SaveSearchIfAbsentPort;
 import com.riu.hotelsearch.domain.model.Search;
 import com.riu.hotelsearch.domain.model.SearchRecord;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -17,7 +16,6 @@ import java.time.Instant;
  * <p>La operación es transaccional para garantizar que la inserción de la búsqueda
  * y la actualización del contador agregado se confirmen o reviertan juntas.</p>
  */
-@Service
 public class PersistSearchService implements PersistSearchUseCase {
 
     private final SaveSearchIfAbsentPort saveSearchIfAbsentPort;
@@ -37,29 +35,28 @@ public class PersistSearchService implements PersistSearchUseCase {
      * <p>Si la búsqueda ya había sido registrada previamente, no vuelve a insertarse
      * ni incrementa nuevamente el contador agregado.</p>
      *
-     * @param message evento consumido desde Kafka
+     * @param event evento consumido desde Kafka
      */
     @Override
-    @Transactional
-    public void persist(SearchMessage message) {
+    public void persist(SearchRegisteredEvent event) {
         Search search = new Search(
-                message.hotelId(),
-                message.checkIn(),
-                message.checkOut(),
-                message.ages()
+                event.hotelId(),
+                event.checkIn(),
+                event.checkOut(),
+                event.ages()
         );
 
         SearchRecord record = new SearchRecord(
-                message.searchId(),
+                event.searchId(),
                 search,
-                message.fingerprint(),
+                event.fingerprint(),
                 Instant.now()
         );
 
         boolean inserted = saveSearchIfAbsentPort.saveIfAbsent(record);
 
         if (inserted) {
-            incrementSearchCountPort.increment(message.fingerprint());
+            incrementSearchCountPort.increment(event.fingerprint());
         }
     }
 }

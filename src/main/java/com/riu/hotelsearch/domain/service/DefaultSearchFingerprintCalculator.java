@@ -1,7 +1,6 @@
 package com.riu.hotelsearch.domain.service;
 
 import com.riu.hotelsearch.domain.model.Search;
-import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
  * <p>El valor se genera a partir de una concatenación determinística de los
  * campos relevantes de la búsqueda, respetando el orden original de las edades.</p>
  */
-@Component
 public class DefaultSearchFingerprintCalculator implements SearchFingerprintCalculator {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;

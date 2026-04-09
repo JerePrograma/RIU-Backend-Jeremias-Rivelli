@@ -1,8 +1,8 @@
 package com.riu.hotelsearch.application.service;
 
 import com.riu.hotelsearch.application.exception.SearchNotFoundException;
-import com.riu.hotelsearch.application.port.out.FindSearchPort;
-import com.riu.hotelsearch.application.port.out.GetSearchCountPort;
+import com.riu.hotelsearch.domain.port.out.FindSearchPort;
+import com.riu.hotelsearch.domain.port.out.GetSearchCountPort;
 import com.riu.hotelsearch.domain.model.Search;
 import com.riu.hotelsearch.domain.model.SearchCount;
 import com.riu.hotelsearch.domain.model.SearchRecord;

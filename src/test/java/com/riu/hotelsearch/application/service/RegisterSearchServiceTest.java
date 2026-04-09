@@ -1,9 +1,9 @@
 package com.riu.hotelsearch.application.service;
 
-import com.riu.hotelsearch.adapter.out.kafka.SearchMessage;
-import com.riu.hotelsearch.application.port.out.PublishSearchEventPort;
-import com.riu.hotelsearch.application.support.SearchIdGenerator;
+import com.riu.hotelsearch.domain.event.SearchRegisteredEvent;
 import com.riu.hotelsearch.domain.model.Search;
+import com.riu.hotelsearch.domain.port.out.PublishSearchEventPort;
+import com.riu.hotelsearch.domain.port.out.SearchIdGenerator;
 import com.riu.hotelsearch.domain.service.SearchFingerprintCalculator;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,7 +27,7 @@ class RegisterSearchServiceTest {
     );
 
     @Test
-    void shouldGenerateIdCalculateFingerprintAndPublishMessage() {
+    void shouldGenerateIdCalculateFingerprintAndPublishEvent() {
         Search search = new Search(
                 "1234aBc",
                 LocalDate.of(2023, 12, 29),
@@ -42,20 +42,22 @@ class RegisterSearchServiceTest {
 
         assertEquals("search-id-1", result);
 
-        ArgumentCaptor<SearchMessage> captor = ArgumentCaptor.forClass(SearchMessage.class);
+        ArgumentCaptor<SearchRegisteredEvent> captor =
+                ArgumentCaptor.forClass(SearchRegisteredEvent.class);
+
         verify(publishSearchEventPort).publish(captor.capture());
 
-        SearchMessage message = captor.getValue();
-        assertEquals("search-id-1", message.searchId());
-        assertEquals("fingerprint-1", message.fingerprint());
-        assertEquals("1234aBc", message.hotelId());
-        assertEquals(LocalDate.of(2023, 12, 29), message.checkIn());
-        assertEquals(LocalDate.of(2023, 12, 31), message.checkOut());
-        assertEquals(List.of(30, 29, 1, 3), message.ages());
+        SearchRegisteredEvent event = captor.getValue();
+        assertEquals("search-id-1", event.searchId());
+        assertEquals("fingerprint-1", event.fingerprint());
+        assertEquals("1234aBc", event.hotelId());
+        assertEquals(LocalDate.of(2023, 12, 29), event.checkIn());
+        assertEquals(LocalDate.of(2023, 12, 31), event.checkOut());
+        assertEquals(List.of(30, 29, 1, 3), event.ages());
     }
 
     @Test
-    void shouldPreserveAgeOrderInPublishedMessage() {
+    void shouldPreserveAgeOrderInPublishedEvent() {
         Search search = new Search(
                 "1234aBc",
                 LocalDate.of(2023, 12, 29),
@@ -68,7 +70,9 @@ class RegisterSearchServiceTest {
 
         service.register(search);
 
-        ArgumentCaptor<SearchMessage> captor = ArgumentCaptor.forClass(SearchMessage.class);
+        ArgumentCaptor<SearchRegisteredEvent> captor =
+                ArgumentCaptor.forClass(SearchRegisteredEvent.class);
+
         verify(publishSearchEventPort).publish(captor.capture());
 
         assertEquals(List.of(3, 29, 30, 1), captor.getValue().ages());

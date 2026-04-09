@@ -2,17 +2,15 @@ package com.riu.hotelsearch.application.service;
 
 import com.riu.hotelsearch.application.exception.SearchNotFoundException;
 import com.riu.hotelsearch.application.port.in.CountSearchUseCase;
-import com.riu.hotelsearch.application.port.out.FindSearchPort;
-import com.riu.hotelsearch.application.port.out.GetSearchCountPort;
+import com.riu.hotelsearch.domain.port.out.FindSearchPort;
+import com.riu.hotelsearch.domain.port.out.GetSearchCountPort;
 import com.riu.hotelsearch.domain.model.SearchCount;
 import com.riu.hotelsearch.domain.model.SearchRecord;
-import org.springframework.stereotype.Service;
 
 /**
  * Servicio de aplicación encargado de consultar el total de búsquedas
  * equivalentes a partir de un searchId.
  */
-@Service
 public class CountSearchService implements CountSearchUseCase {
 
     private final FindSearchPort findSearchPort;

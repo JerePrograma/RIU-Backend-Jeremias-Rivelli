@@ -1,6 +1,6 @@
 services:
   oracle:
-    image: gvenzl/oracle-free:${ORACLE_IMAGE_TAG:-23-slim}
+    image: gvenzl/oracle-free:${ORACLE_IMAGE_TAG:-23-slim-faststart}
     environment:
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:-oracle_local_change_me_2026}
       APP_USER: ${APP_USER:-hotel_app}
@@ -9,10 +9,10 @@ services:
       - oracle-data:/opt/oracle/oradata
     healthcheck:
       test: ["CMD-SHELL", "healthcheck.sh >/dev/null || exit 1"]
-      interval: 15s
-      timeout: 10s
+      interval: 30s
+      timeout: 15s
       retries: 20
-      start_period: 40s
+      start_period: 8m
     networks:
       - hotel-net
 

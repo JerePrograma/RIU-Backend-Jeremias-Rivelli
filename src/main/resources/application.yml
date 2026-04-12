@@ -13,8 +13,8 @@ spring:
 
   sql:
     init:
-      mode: ${SQL_INIT_MODE:always}
-      schema-locations: ${SQL_INIT_SCHEMA:classpath:db/schema.sql}
+      mode: always
+      schema-locations: classpath:db/V1__initial_schema.sql
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
@@ -25,7 +25,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: ${KAFKA_TRUSTED_PACKAGES:com.riu.hotelsearch.adapter.out.kafka}
+        spring.json.trusted.packages: ${KAFKA_TRUSTED_PACKAGES:com.riu.hotelsearch.*}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

@@ -1,5 +1,6 @@
 package com.riu.hotelsearch.application.service;
 
+import com.riu.hotelsearch.application.exception.SearchPublicationException;
 import com.riu.hotelsearch.domain.event.SearchRegisteredEvent;
 import com.riu.hotelsearch.domain.model.Search;
 import com.riu.hotelsearch.domain.port.out.PublishSearchEventPort;
@@ -11,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -76,5 +78,23 @@ class RegisterSearchServiceTest {
         verify(publishSearchEventPort).publish(captor.capture());
 
         assertEquals(List.of(3, 29, 30, 1), captor.getValue().ages());
+    }
+
+    @Test
+    void shouldPropagateWhenPublishingFails() {
+        Search search = new Search(
+                "1234aBc",
+                LocalDate.of(2023, 12, 29),
+                LocalDate.of(2023, 12, 31),
+                List.of(30, 29, 1, 3)
+        );
+
+        when(searchIdGenerator.nextId()).thenReturn("search-id-1");
+        when(fingerprintCalculator.calculate(search)).thenReturn("fingerprint-1");
+        doThrow(new SearchPublicationException("Could not publish search event", new RuntimeException("boom")))
+                .when(publishSearchEventPort)
+                .publish(any(SearchRegisteredEvent.class));
+
+        assertThrows(SearchPublicationException.class, () -> service.register(search));
     }
 }

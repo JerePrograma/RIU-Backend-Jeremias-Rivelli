@@ -1,5 +1,6 @@
 package com.riu.hotelsearch.infrastructure.in.web;
 
+import com.riu.hotelsearch.application.exception.SearchPublicationException;
 import com.riu.hotelsearch.application.port.in.RegisterSearchUseCase;
 import com.riu.hotelsearch.domain.model.Search;
 import org.junit.jupiter.api.DisplayName;
@@ -149,5 +150,24 @@ class SearchControllerWebMvcTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error").value("Internal error"))
                 .andExpect(jsonPath("$.details[0]").value("Unexpected error"));
+    }
+
+    @Test
+    void shouldReturnServiceUnavailableWhenPublicationFails() throws Exception {
+        when(registerSearchUseCase.register(any(Search.class)))
+                .thenThrow(new SearchPublicationException("Could not publish search event to Kafka", new RuntimeException("boom")));
+
+        mockMvc.perform(post("/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                              "hotelId": "1234aBc",
+                              "checkIn": "29/12/2023",
+                              "checkOut": "31/12/2023",
+                              "ages": [30, 29, 1, 3]
+                            }
+                            """))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.error").value("Service unavailable"));
     }
 }

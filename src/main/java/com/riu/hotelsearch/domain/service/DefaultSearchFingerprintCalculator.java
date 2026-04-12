@@ -30,10 +30,12 @@ public class DefaultSearchFingerprintCalculator implements SearchFingerprintCalc
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
 
-        String raw = search.hotelId() + '|' +
-                search.checkIn().format(FORMATTER) + '|' +
-                search.checkOut().format(FORMATTER) + '|' +
-                ages;
+        String raw = String.join("|",
+                search.hotelId(),
+                search.checkIn().format(FORMATTER),
+                search.checkOut().format(FORMATTER),
+                ages
+        );
 
         return sha256(raw);
     }

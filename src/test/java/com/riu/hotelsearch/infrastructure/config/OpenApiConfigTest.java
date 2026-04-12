@@ -21,6 +21,6 @@ class OpenApiConfigTest {
         assertTrue(openAPI.getInfo().getDescription().contains("POST /search"));
         assertNotNull(openAPI.getExternalDocs());
         assertEquals("Documentación del proyecto", openAPI.getExternalDocs().getDescription());
-        assertEquals("REEMPLAZAR_POR_URL_DEL_REPOSITORIO", openAPI.getExternalDocs().getUrl());
+        assertEquals("https://github.com/JerePrograma/RIU-Backend-Jeremias-Rivelli", openAPI.getExternalDocs().getUrl());
     }
 }

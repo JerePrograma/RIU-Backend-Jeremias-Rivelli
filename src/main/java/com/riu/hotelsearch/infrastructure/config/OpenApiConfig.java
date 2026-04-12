@@ -32,6 +32,6 @@ public class OpenApiConfig {
                                 """))
                 .externalDocs(new ExternalDocumentation()
                         .description("Documentación del proyecto")
-                        .url("REEMPLAZAR_POR_URL_DEL_REPOSITORIO"));
+                        .url("https://github.com/JerePrograma/RIU-Backend-Jeremias-Rivelli"));
     }
 }

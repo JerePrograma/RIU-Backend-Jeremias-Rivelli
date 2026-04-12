@@ -2,6 +2,7 @@ package com.riu.hotelsearch.infrastructure.in.web;
 
 import com.riu.hotelsearch.infrastructure.in.web.dto.ErrorResponseDto;
 import com.riu.hotelsearch.application.exception.SearchNotFoundException;
+import com.riu.hotelsearch.application.exception.SearchPublicationException;
 import com.riu.hotelsearch.domain.exception.InvalidSearchException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -79,6 +80,18 @@ public class RestExceptionHandler {
                         Instant.now(),
                         404,
                         "Not found",
+                        List.of(ex.getMessage())
+                )
+        );
+    }
+
+    @ExceptionHandler(SearchPublicationException.class)
+    public ResponseEntity<ErrorResponseDto> handleSearchPublication(SearchPublicationException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                new ErrorResponseDto(
+                        Instant.now(),
+                        503,
+                        "Service unavailable",
                         List.of(ex.getMessage())
                 )
         );

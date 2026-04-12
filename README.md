@@ -25,6 +25,20 @@ Las respuestas REST y los mensajes de error de la API se mantienen en inglés pa
 
 Hay algunas decisiones que conviene dejar explícitas porque forman parte de la solución y no son accidentales.
 
+## Cobertura de requerimientos del challenge
+
+- Java 21 y Spring Boot 3.x
+- Payload inmutable con record
+- Validación de request y validación de dominio
+- ID generado sin acceso a base de datos
+- Kafka producer + consumer separados
+- Persistencia asíncrona
+- Oracle como base de datos
+- Arquitectura hexagonal en application/domain/infrastructure
+- Docker Compose para entorno completo
+- OpenAPI / Swagger habilitado
+- JaCoCo con umbral mínimo del 80%
+- 
 ### Persistencia asíncrona
 
 El endpoint `POST /search` no persiste directamente en base de datos. En su lugar:

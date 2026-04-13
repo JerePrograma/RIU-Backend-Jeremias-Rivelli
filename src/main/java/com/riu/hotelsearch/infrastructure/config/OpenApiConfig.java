@@ -23,7 +23,7 @@ public class OpenApiConfig {
                         .version("1.0.0")
                         .description("""
                                 API para registrar búsquedas de disponibilidad de hotel de forma asíncrona
-                                y consultar cuántas veces se repitió una búsqueda equivalente.
+                                y consultar Fcuántas veces se repitió una búsqueda equivalente.
                                 
                                 La operación POST /search responde 202 Accepted porque la persistencia se
                                 desacopla mediante Kafka.

@@ -3,6 +3,7 @@ package com.riu.hotelsearch.infrastructure.config.kafka;
 import com.riu.hotelsearch.infrastructure.out.messaging.kafka.SearchMessage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -10,8 +11,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 @Configuration
 public class KafkaListenerConfig {
 
-    /**
-     * Configura el contenedor de listeners Kafka utilizado por la aplicación.
+    /* Configura el contenedor de listeners Kafka utilizado por la aplicación.
      *
      * <p>La confirmación manual del offset permite reconocer el mensaje solo
      * después de completar su persistencia.</p>
@@ -19,11 +19,13 @@ public class KafkaListenerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, SearchMessage> searchKafkaListenerContainerFactory(
             ConsumerFactory<String, SearchMessage> consumerFactory,
-            AppKafkaProperties properties
+            AppKafkaProperties properties,
+            AsyncTaskExecutor kafkaListenerTaskExecutor
     ) {
         var factory = new ConcurrentKafkaListenerContainerFactory<String, SearchMessage>();
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(properties.listenerConcurrency());
+        factory.getContainerProperties().setListenerTaskExecutor(kafkaListenerTaskExecutor);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.getContainerProperties().setMissingTopicsFatal(true);
         return factory;

@@ -1,9 +1,8 @@
 package com.riu.hotelsearch.infrastructure.config.kafka;
 
-import com.riu.hotelsearch.infrastructure.config.kafka.AppKafkaProperties;
-import com.riu.hotelsearch.infrastructure.config.kafka.KafkaListenerConfig;
 import com.riu.hotelsearch.infrastructure.out.messaging.kafka.SearchMessage;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -20,6 +19,8 @@ class KafkaListenerConfigTest {
         @SuppressWarnings("unchecked")
         ConsumerFactory<String, SearchMessage> consumerFactory = mock(ConsumerFactory.class);
 
+        AsyncTaskExecutor kafkaListenerTaskExecutor = mock(AsyncTaskExecutor.class);
+
         AppKafkaProperties properties = new AppKafkaProperties(
                 "hotel_availability_searches",
                 1,
@@ -28,7 +29,11 @@ class KafkaListenerConfigTest {
         );
 
         ConcurrentKafkaListenerContainerFactory<String, SearchMessage> factory =
-                config.searchKafkaListenerContainerFactory(consumerFactory, properties);
+                config.searchKafkaListenerContainerFactory(
+                        consumerFactory,
+                        properties,
+                        kafkaListenerTaskExecutor
+                );
 
         assertThat(factory).isNotNull();
         assertThat(factory.getConsumerFactory()).isSameAs(consumerFactory);

@@ -32,6 +32,7 @@ class SearchRowMapperTest {
 
         SearchRecord result = mapper.mapRow(rs, 1);
 
+        assertNotNull(result);
         assertEquals("search-id-1", result.searchId());
         assertEquals("1234aBc", result.search().hotelId());
         assertEquals(LocalDate.of(2023, 12, 29), result.search().checkIn());

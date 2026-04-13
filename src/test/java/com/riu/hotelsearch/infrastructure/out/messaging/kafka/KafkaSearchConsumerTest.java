@@ -1,8 +1,8 @@
-package com.riu.hotelsearch.infrastructure.in.messaging.kafka;
+package com.riu.hotelsearch.infrastructure.out.messaging.kafka;
 
 import com.riu.hotelsearch.application.port.in.PersistSearchUseCase;
 import com.riu.hotelsearch.domain.event.SearchRegisteredEvent;
-import com.riu.hotelsearch.infrastructure.out.messaging.kafka.SearchMessage;
+import com.riu.hotelsearch.infrastructure.in.messaging.kafka.KafkaSearchConsumer;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.kafka.support.Acknowledgment;
